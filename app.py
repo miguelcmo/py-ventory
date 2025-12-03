@@ -20,7 +20,22 @@ if not SUPABASE_URL or not SUPABASE_KEY:
         "Please set SUPABASE_URL and SUPABASE_KEY in your environment."
     )
 
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+# Lazy initialization of Supabase client to avoid import-time errors
+_supabase_client = None
+
+def get_supabase() -> Client:
+    """Get or create Supabase client instance"""
+    global _supabase_client
+    if _supabase_client is None:
+        _supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)
+    return _supabase_client
+
+# For backwards compatibility, create a property-like accessor
+class SupabaseProxy:
+    def __getattr__(self, name):
+        return getattr(get_supabase(), name)
+
+supabase = SupabaseProxy()
 
 
 @app.route('/')
