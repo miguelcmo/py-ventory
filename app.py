@@ -12,6 +12,14 @@ app.secret_key = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
 # Configuración de Supabase
 SUPABASE_URL = os.getenv('SUPABASE_URL')
 SUPABASE_KEY = os.getenv('SUPABASE_KEY')
+
+# Validar que las variables de entorno estén configuradas
+if not SUPABASE_URL or not SUPABASE_KEY:
+    raise ValueError(
+        "Missing required environment variables. "
+        "Please set SUPABASE_URL and SUPABASE_KEY in your environment."
+    )
+
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 
