@@ -1,0 +1,228 @@
+/* =====================================================
+   VARIABLES PERSONALIZADAS PARA INVENTARIO APP
+   ===================================================== */
+
+:root {
+    /* Colores Primarios */
+    --color-primary: #2563eb;
+    --color-primary-hover: #1d4ed8;
+    --color-primary-light: #dbeafe;
+
+    /* Colores Secundarios */
+    --color-secondary: #64748b;
+    --color-secondary-hover: #475569;
+    --color-secondary-light: #f1f5f9;
+
+    /* Colores de Estado */
+    --color-success: #10b981;
+    --color-success-light: #d1fae5;
+    --color-warning: #f59e0b;
+    --color-warning-light: #fef3c7;
+    --color-danger: #ef4444;
+    --color-danger-light: #fee2e2;
+    --color-info: #3b82f6;
+    --color-info-light: #dbeafe;
+
+    /* Colores de Fondo */
+    --bg-main: #ffffff;
+    --bg-secondary: #f8fafc;
+    --bg-card: #ffffff;
+    --bg-hover: #f1f5f9;
+
+    /* Colores de Texto */
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --text-muted: #94a3b8;
+    --text-light: #cbd5e1;
+
+    /* Bordes */
+    --border-color: #e2e8f0;
+    --border-radius: 0.5rem;
+    --border-radius-lg: 0.75rem;
+    --border-radius-sm: 0.25rem;
+
+    /* Sombras */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+    /* Espaciado */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+
+    /* Tipografía */
+    --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+
+    /* Transitions */
+    --transition: all 0.3s ease;
+}
+
+/* =====================================================
+   ESTILOS GLOBALES
+   ===================================================== */
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+/* =====================================================
+   NAVBAR
+   ===================================================== */
+
+.navbar-custom {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+    box-shadow: var(--shadow-md);
+}
+
+.navbar-custom .navbar-brand {
+    font-weight: 700;
+    font-size: var(--font-size-xl);
+    color: white !important;
+}
+
+.navbar-custom .nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+    transition: var(--transition);
+    font-weight: 500;
+}
+
+.navbar-custom .nav-link:hover {
+    color: white !important;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-sm);
+}
+
+/* =====================================================
+   CARDS
+   ===================================================== */
+
+.card-custom {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+}
+
+.card-custom:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+.card-header-custom {
+    background-color: var(--bg-secondary);
+    border-bottom: 2px solid var(--color-primary);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* =====================================================
+   BOTONES
+   ===================================================== */
+
+.btn-primary-custom {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+    transition: var(--transition);
+    font-weight: 500;
+}
+
+.btn-primary-custom:hover {
+    background-color: var(--color-primary-hover);
+    border-color: var(--color-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+/* =====================================================
+   TABLAS
+   ===================================================== */
+
+.table-custom {
+    background-color: var(--bg-card);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.table-custom thead {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.table-custom tbody tr {
+    transition: var(--transition);
+}
+
+.table-custom tbody tr:hover {
+    background-color: var(--bg-hover);
+}
+
+/* =====================================================
+   BADGES
+   ===================================================== */
+
+.badge-stock-low {
+    background-color: var(--color-danger);
+    color: white;
+}
+
+.badge-stock-ok {
+    background-color: var(--color-success);
+    color: white;
+}
+
+.badge-stock-medium {
+    background-color: var(--color-warning);
+    color: white;
+}
+
+/* =====================================================
+   ALERTS
+   ===================================================== */
+
+.alert-custom {
+    border-radius: var(--border-radius);
+    border-left: 4px solid;
+}
+
+/* =====================================================
+   FORMULARIOS
+   ===================================================== */
+
+.form-control:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+}
+
+.form-label {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+/* =====================================================
+   UTILIDADES
+   ===================================================== */
+
+.text-muted-custom {
+    color: var(--text-muted) !important;
+}
+
+.shadow-custom {
+    box-shadow: var(--shadow);
+}
+
+.shadow-custom-lg {
+    box-shadow: var(--shadow-lg);
+}

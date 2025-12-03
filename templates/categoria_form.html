@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}{% if categoria %}Editar{% else %}Nueva{% endif %} Categoría - Inventario App{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h1 class="display-5">
+            <i class="bi bi-{% if categoria %}pencil-square{% else %}plus-circle{% endif %}"></i>
+            {% if categoria %}Editar{% else %}Nueva{% endif %} Categoría
+        </h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('categorias') }}">Categorías</a></li>
+                <li class="breadcrumb-item active">{% if categoria %}Editar{% else %}Nueva{% endif %}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<!-- Formulario -->
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card card-custom shadow-custom-lg">
+            <div class="card-header card-header-custom">
+                <i class="bi bi-info-circle"></i> Información de la Categoría
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row g-3">
+                        <!-- Nombre -->
+                        <div class="col-md-12">
+                            <label for="nombre" class="form-label">
+                                <i class="bi bi-tag"></i> Nombre de la Categoría *
+                            </label>
+                            <input type="text" class="form-control" id="nombre" name="nombre"
+                                   value="{{ categoria.nombre if categoria else '' }}"
+                                   placeholder="Ej: Electrónica, Alimentos, etc."
+                                   required>
+                            <div class="form-text">
+                                El nombre debe ser único y descriptivo
+                            </div>
+                        </div>
+
+                        <!-- Descripción -->
+                        <div class="col-md-12">
+                            <label for="descripcion" class="form-label">
+                                <i class="bi bi-file-text"></i> Descripción
+                            </label>
+                            <textarea class="form-control" id="descripcion" name="descripcion"
+                                      rows="4"
+                                      placeholder="Describe qué tipo de productos pertenecen a esta categoría...">{{ categoria.descripcion if categoria else '' }}</textarea>
+                            <div class="form-text">
+                                Proporciona una descripción clara para facilitar la clasificación de productos
+                            </div>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="col-md-12 mt-4">
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="{{ url_for('categorias') }}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle"></i> Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-primary-custom">
+                                    <i class="bi bi-check-circle"></i>
+                                    {% if categoria %}Actualizar{% else %}Crear{% endif %} Categoría
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Información Adicional -->
+        {% if categoria %}
+        <div class="card card-custom mt-3">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-3 text-muted-custom">
+                    <i class="bi bi-clock"></i> Información del Sistema
+                </h6>
+                <div class="row">
+                    <div class="col-md-4">
+                        <small class="text-muted-custom">
+                            <strong>ID:</strong> {{ categoria.id }}
+                        </small>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted-custom">
+                            <strong>Creado:</strong> {{ categoria.created_at[:10] if categoria.created_at else 'N/A' }}
+                        </small>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted-custom">
+                            <strong>Actualizado:</strong> {{ categoria.updated_at[:10] if categoria.updated_at else 'N/A' }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vista Previa de Productos -->
+        <div class="card card-custom mt-3">
+            <div class="card-header card-header-custom">
+                <i class="bi bi-box"></i> Productos en esta Categoría
+            </div>
+            <div class="card-body">
+                <p class="text-muted-custom mb-2">
+                    Esta categoría contiene productos asociados. Puedes verlos en la
+                    <a href="{{ url_for('productos') }}">página de productos</a>.
+                </p>
+                <small class="text-muted-custom">
+                    <i class="bi bi-info-circle"></i>
+                    Nota: Si eliminas esta categoría, los productos asociados quedarán sin categoría asignada.
+                </small>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

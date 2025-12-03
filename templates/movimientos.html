@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}Movimientos de Inventario - Inventario App{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h1 class="display-5">
+            <i class="bi bi-arrow-left-right"></i> Movimientos de Inventario
+        </h1>
+        <p class="text-muted-custom">Historial completo de entradas, salidas y ajustes</p>
+    </div>
+    <div class="col-md-6 text-end">
+        <a href="{{ url_for('nuevo_movimiento') }}" class="btn btn-primary-custom btn-lg">
+            <i class="bi bi-plus-circle"></i> Registrar Movimiento
+        </a>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card card-custom">
+            <div class="card-body">
+                <form method="GET" action="{{ url_for('movimientos') }}" class="row g-3">
+                    <div class="col-md-10">
+                        <label for="producto_id" class="form-label">
+                            <i class="bi bi-filter"></i> Filtrar por Producto
+                        </label>
+                        <select class="form-select" id="producto_id" name="producto_id" onchange="this.form.submit()">
+                            <option value="">Todos los productos</option>
+                            {% for producto in productos %}
+                            <option value="{{ producto.id }}"
+                                {% if producto_id_filtro == producto.id %}selected{% endif %}>
+                                {% if producto.sku %}[{{ producto.sku }}]{% endif %} {{ producto.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        {% if producto_id_filtro %}
+                        <a href="{{ url_for('movimientos') }}" class="btn btn-outline-secondary w-100">
+                            <i class="bi bi-x-circle"></i> Limpiar
+                        </a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabla de Movimientos -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card card-custom">
+            <div class="card-header card-header-custom">
+                <i class="bi bi-clock-history"></i> Historial de Movimientos
+                <span class="badge bg-primary float-end">{{ movimientos|length }} registros</span>
+            </div>
+            <div class="card-body">
+                {% if movimientos %}
+                <div class="table-responsive">
+                    <table class="table table-hover table-custom">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Producto</th>
+                                <th>Tipo</th>
+                                <th>Cantidad</th>
+                                <th>Stock Anterior</th>
+                                <th>Stock Nuevo</th>
+                                <th>Motivo</th>
+                                <th>Referencia</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for movimiento in movimientos %}
+                            <tr>
+                                <td>
+                                    <small>
+                                        <i class="bi bi-calendar"></i>
+                                        {{ movimiento.created_at[:10] if movimiento.created_at else 'N/A' }}
+                                        <br>
+                                        <i class="bi bi-clock"></i>
+                                        {{ movimiento.created_at[11:19] if movimiento.created_at else '' }}
+                                    </small>
+                                </td>
+                                <td>
+                                    {% if movimiento.productos %}
+                                        <strong>{{ movimiento.productos.nombre }}</strong>
+                                        {% if movimiento.productos.sku %}
+                                        <br><small class="text-muted-custom"><code>{{ movimiento.productos.sku }}</code></small>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-muted-custom">Producto eliminado</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if movimiento.tipo == 'entrada' %}
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-arrow-down-circle"></i> Entrada
+                                        </span>
+                                    {% elif movimiento.tipo == 'salida' %}
+                                        <span class="badge bg-danger">
+                                            <i class="bi bi-arrow-up-circle"></i> Salida
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-warning">
+                                            <i class="bi bi-pencil-square"></i> Ajuste
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong>
+                                        {% if movimiento.tipo == 'entrada' %}
+                                            <span class="text-success">+{{ movimiento.cantidad }}</span>
+                                        {% elif movimiento.tipo == 'salida' %}
+                                            <span class="text-danger">-{{ movimiento.cantidad }}</span>
+                                        {% else %}
+                                            <span class="text-warning">{{ movimiento.cantidad }}</span>
+                                        {% endif %}
+                                    </strong>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ movimiento.cantidad_anterior }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">{{ movimiento.cantidad_nueva }}</span>
+                                </td>
+                                <td>
+                                    <small class="text-muted-custom">
+                                        {{ movimiento.motivo if movimiento.motivo else '-' }}
+                                    </small>
+                                </td>
+                                <td>
+                                    <small class="text-muted-custom">
+                                        {% if movimiento.referencia %}
+                                            <code>{{ movimiento.referencia }}</code>
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </small>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if movimientos|length >= 100 %}
+                <div class="alert alert-info mt-3">
+                    <i class="bi bi-info-circle"></i>
+                    Se muestran los últimos 100 movimientos. Usa los filtros para buscar registros específicos.
+                </div>
+                {% endif %}
+
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox fs-1 text-muted-custom"></i>
+                    <h4 class="mt-3 text-muted-custom">No hay movimientos registrados</h4>
+                    <p class="text-muted-custom">
+                        {% if producto_id_filtro %}
+                        No hay movimientos para el producto seleccionado
+                        {% else %}
+                        Los movimientos se registran automáticamente al actualizar cantidades de productos
+                        {% endif %}
+                    </p>
+                    <a href="{{ url_for('nuevo_movimiento') }}" class="btn btn-primary-custom mt-3">
+                        <i class="bi bi-plus-circle"></i> Registrar Movimiento
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Información adicional -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card card-custom">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted-custom">
+                    <i class="bi bi-info-circle"></i> Acerca de los Movimientos
+                </h6>
+                <ul class="list-unstyled mb-0">
+                    <li><i class="bi bi-arrow-down-circle text-success"></i> <strong>Entrada:</strong> Incrementa el stock (compras, devoluciones de clientes, etc.)</li>
+                    <li><i class="bi bi-arrow-up-circle text-danger"></i> <strong>Salida:</strong> Disminuye el stock (ventas, devoluciones a proveedores, etc.)</li>
+                    <li><i class="bi bi-pencil-square text-warning"></i> <strong>Ajuste:</strong> Corrección de inventario (inventarios físicos, correcciones, etc.)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

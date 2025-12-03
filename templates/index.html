@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Inventario App{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1 class="display-4">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </h1>
+        <p class="lead text-muted-custom">Resumen general del inventario</p>
+    </div>
+</div>
+
+<!-- Tarjetas de Estadísticas -->
+<div class="row g-4 mb-4">
+    <!-- Total Productos -->
+    <div class="col-md-3">
+        <div class="card card-custom border-primary shadow-custom">
+            <div class="card-body text-center">
+                <i class="bi bi-box-seam fs-1 text-primary"></i>
+                <h3 class="mt-3 mb-0">{{ total_productos }}</h3>
+                <p class="text-muted-custom mb-0">Total Productos</p>
+                <small class="text-muted-custom">{{ total_items }} items en stock</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Valor Total -->
+    <div class="col-md-3">
+        <div class="card card-custom border-success shadow-custom">
+            <div class="card-body text-center">
+                <i class="bi bi-currency-dollar fs-1 text-success"></i>
+                <h3 class="mt-3 mb-0">${{ "%.2f"|format(valor_total) }}</h3>
+                <p class="text-muted-custom mb-0">Valor Total</p>
+                <small class="text-muted-custom">Inventario valorizado</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Categorías -->
+    <div class="col-md-3">
+        <div class="card card-custom border-info shadow-custom">
+            <div class="card-body text-center">
+                <i class="bi bi-folder fs-1 text-info"></i>
+                <h3 class="mt-3 mb-0">{{ resumen_categorias|length }}</h3>
+                <p class="text-muted-custom mb-0">Categorías Activas</p>
+                <small class="text-muted-custom">
+                    <a href="{{ url_for('categorias') }}" class="text-decoration-none">Ver categorías</a>
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bajo Stock -->
+    <div class="col-md-3">
+        <div class="card card-custom border-danger shadow-custom">
+            <div class="card-body text-center">
+                <i class="bi bi-exclamation-triangle fs-1 text-danger"></i>
+                <h3 class="mt-3 mb-0">{{ total_bajo_stock }}</h3>
+                <p class="text-muted-custom mb-0">Bajo Stock</p>
+                <small class="text-muted-custom">
+                    {% if total_bajo_stock > 0 %}
+                        <span class="text-danger">¡Requiere atención!</span>
+                    {% else %}
+                        <span class="text-success">Todo OK</span>
+                    {% endif %}
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Acciones Rápidas -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card card-custom shadow-custom">
+            <div class="card-header card-header-custom">
+                <i class="bi bi-lightning-charge"></i> Acciones Rápidas
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2 d-md-flex">
+                    <a href="{{ url_for('nuevo_producto') }}" class="btn btn-primary-custom">
+                        <i class="bi bi-plus-circle"></i> Nuevo Producto
+                    </a>
+                    <a href="{{ url_for('nueva_categoria') }}" class="btn btn-outline-primary">
+                        <i class="bi bi-folder-plus"></i> Nueva Categoría
+                    </a>
+                    <a href="{{ url_for('nuevo_movimiento') }}" class="btn btn-outline-success">
+                        <i class="bi bi-arrow-left-right"></i> Registrar Movimiento
+                    </a>
+                    <a href="{{ url_for('productos') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-list-ul"></i> Ver Inventario Completo
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fila con dos columnas -->
+<div class="row mb-4">
+    <!-- Productos con Bajo Stock -->
+    <div class="col-md-6">
+        <div class="card card-custom shadow-custom h-100">
+            <div class="card-header card-header-custom">
+                <i class="bi bi-exclamation-triangle"></i> Productos con Bajo Stock
+                {% if total_bajo_stock > 0 %}
+                    <span class="badge bg-danger float-end">{{ total_bajo_stock }}</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if productos_bajo_stock %}
+                    <div class="list-group list-group-flush">
+                        {% for producto in productos_bajo_stock[:5] %}
+                        <div class="list-group-item px-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ producto.nombre }}</strong>
+                                    {% if producto.sku %}
+                                    <br><small class="text-muted-custom"><code>{{ producto.sku }}</code></small>
+                                    {% endif %}
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge badge-stock-low">{{ producto.cantidad }}</span>
+                                    <br><small class="text-muted-custom">Mín: {{ producto.cantidad_minima }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% if total_bajo_stock > 5 %}
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('productos') }}" class="btn btn-sm btn-outline-secondary">
+                            Ver todos los productos
+                        </a>
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-check-circle fs-1 text-success"></i>
+                        <p class="text-muted-custom mb-0 mt-2">
+                            ¡Todos los productos tienen stock suficiente!
+                        </p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Resumen por Categorías -->
+    <div class="col-md-6">
+        <div class="card card-custom shadow-custom h-100">
+            <div class="card-header card-header-custom">
+                <i class="bi bi-pie-chart"></i> Resumen por Categorías
+            </div>
+            <div class="card-body">
+                {% if resumen_categorias %}
+                    <div class="list-group list-group-flush">
+                        {% for categoria in resumen_categorias[:5] %}
+                        <div class="list-group-item px-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="bi bi-folder-fill text-secondary"></i>
+                                    <strong>{{ categoria.nombre }}</strong>
+                                    <br><small class="text-muted-custom">{{ categoria.total_productos }} producto(s)</small>
+                                </div>
+                                <div class="text-end">
+                                    <strong>${{ "%.2f"|format(categoria.valor_total) }}</strong>
+                                    <br><small class="text-muted-custom">{{ categoria.total_items }} items</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('categorias') }}" class="btn btn-sm btn-outline-secondary">
+                            Ver todas las categorías
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-folder-x fs-1 text-muted-custom"></i>
+                        <p class="text-muted-custom mb-2 mt-2">
+                            No hay categorías con productos
+                        </p>
+                        <a href="{{ url_for('nueva_categoria') }}" class="btn btn-sm btn-primary-custom">
+                            <i class="bi bi-plus-circle"></i> Crear Categoría
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Últimos Movimientos -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card card-custom shadow-custom">
+            <div class="card-header card-header-custom">
+                <i class="bi bi-clock-history"></i> Últimos Movimientos de Inventario
+                <a href="{{ url_for('movimientos') }}" class="btn btn-sm btn-outline-light float-end">
+                    Ver todos
+                </a>
+            </div>
+            <div class="card-body">
+                {% if ultimos_movimientos %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Producto</th>
+                                    <th>Tipo</th>
+                                    <th>Cantidad</th>
+                                    <th>Stock</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for movimiento in ultimos_movimientos %}
+                                <tr>
+                                    <td>
+                                        <small>{{ movimiento.created_at[:10] if movimiento.created_at else 'N/A' }}</small>
+                                    </td>
+                                    <td>
+                                        {% if movimiento.productos %}
+                                            {{ movimiento.productos.nombre }}
+                                        {% else %}
+                                            <span class="text-muted-custom">Producto eliminado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if movimiento.tipo == 'entrada' %}
+                                            <span class="badge bg-success">Entrada</span>
+                                        {% elif movimiento.tipo == 'salida' %}
+                                            <span class="badge bg-danger">Salida</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Ajuste</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if movimiento.tipo == 'entrada' %}
+                                            <span class="text-success">+{{ movimiento.cantidad }}</span>
+                                        {% elif movimiento.tipo == 'salida' %}
+                                            <span class="text-danger">-{{ movimiento.cantidad }}</span>
+                                        {% else %}
+                                            {{ movimiento.cantidad }}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small class="text-muted-custom">
+                                            {{ movimiento.cantidad_anterior }} → {{ movimiento.cantidad_nueva }}
+                                        </small>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-inbox fs-1 text-muted-custom"></i>
+                        <p class="text-muted-custom mb-2 mt-2">
+                            No hay movimientos registrados aún
+                        </p>
+                        <p class="text-muted-custom small">
+                            Los movimientos se registran automáticamente al actualizar cantidades
+                        </p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

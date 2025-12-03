@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block title %}Registrar Movimiento - Inventario App{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h1 class="display-5">
+            <i class="bi bi-plus-circle"></i> Registrar Movimiento de Inventario
+        </h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('movimientos') }}">Movimientos</a></li>
+                <li class="breadcrumb-item active">Nuevo</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<!-- Formulario -->
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card card-custom shadow-custom-lg">
+            <div class="card-header card-header-custom">
+                <i class="bi bi-info-circle"></i> Información del Movimiento
+            </div>
+            <div class="card-body">
+                <form method="POST" id="movimientoForm">
+                    <div class="row g-3">
+                        <!-- Producto -->
+                        <div class="col-md-12">
+                            <label for="producto_id" class="form-label">
+                                <i class="bi bi-box"></i> Producto *
+                            </label>
+                            <select class="form-select" id="producto_id" name="producto_id" required onchange="actualizarStockActual()">
+                                <option value="">Selecciona un producto...</option>
+                                {% for producto in productos %}
+                                <option value="{{ producto.id }}" data-stock="{{ producto.cantidad }}">
+                                    {% if producto.sku %}[{{ producto.sku }}]{% endif %} {{ producto.nombre }} (Stock: {{ producto.cantidad }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Stock Actual (solo lectura) -->
+                        <div class="col-md-12">
+                            <div class="alert alert-info" id="stockActualInfo" style="display: none;">
+                                <i class="bi bi-box-seam"></i> <strong>Stock Actual:</strong> <span id="stockActual">0</span> unidades
+                            </div>
+                        </div>
+
+                        <!-- Tipo de Movimiento -->
+                        <div class="col-md-6">
+                            <label for="tipo" class="form-label">
+                                <i class="bi bi-arrow-left-right"></i> Tipo de Movimiento *
+                            </label>
+                            <select class="form-select" id="tipo" name="tipo" required onchange="actualizarTipoMovimiento()">
+                                <option value="">Selecciona un tipo...</option>
+                                <option value="entrada">Entrada (+) - Aumentar Stock</option>
+                                <option value="salida">Salida (-) - Disminuir Stock</option>
+                                <option value="ajuste">Ajuste (=) - Establecer Stock</option>
+                            </select>
+                        </div>
+
+                        <!-- Cantidad -->
+                        <div class="col-md-6">
+                            <label for="cantidad" class="form-label">
+                                <i class="bi bi-123"></i> <span id="cantidadLabel">Cantidad *</span>
+                            </label>
+                            <input type="number" class="form-control" id="cantidad" name="cantidad"
+                                   min="0" value="0" required onchange="calcularNuevoStock()">
+                            <div class="form-text" id="cantidadHelp">Ingresa la cantidad del movimiento</div>
+                        </div>
+
+                        <!-- Nuevo Stock (solo lectura - se calcula automáticamente) -->
+                        <div class="col-md-12" id="nuevoStockContainer" style="display: none;">
+                            <div class="alert" id="nuevoStockInfo">
+                                <i class="bi bi-calculator"></i> <strong>Nuevo Stock:</strong> <span id="nuevoStock">0</span> unidades
+                            </div>
+                        </div>
+
+                        <!-- Motivo -->
+                        <div class="col-md-12">
+                            <label for="motivo" class="form-label">
+                                <i class="bi bi-file-text"></i> Motivo
+                            </label>
+                            <textarea class="form-control" id="motivo" name="motivo"
+                                      rows="3"
+                                      placeholder="Describe el motivo del movimiento (opcional)"></textarea>
+                        </div>
+
+                        <!-- Referencia -->
+                        <div class="col-md-12">
+                            <label for="referencia" class="form-label">
+                                <i class="bi bi-tag"></i> Referencia
+                            </label>
+                            <input type="text" class="form-control" id="referencia" name="referencia"
+                                   placeholder="Número de factura, orden de compra, etc. (opcional)">
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="col-md-12 mt-4">
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="{{ url_for('movimientos') }}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle"></i> Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-primary-custom">
+                                    <i class="bi bi-check-circle"></i> Registrar Movimiento
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Guía de Tipos de Movimiento -->
+        <div class="card card-custom mt-3">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-3 text-muted-custom">
+                    <i class="bi bi-question-circle"></i> Guía de Tipos de Movimiento
+                </h6>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="p-3 border rounded bg-light">
+                            <h6 class="text-success"><i class="bi bi-arrow-down-circle"></i> Entrada</h6>
+                            <p class="small mb-0">Suma al stock existente. Úsalo para: compras, devoluciones de clientes, etc.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 border rounded bg-light">
+                            <h6 class="text-danger"><i class="bi bi-arrow-up-circle"></i> Salida</h6>
+                            <p class="small mb-0">Resta del stock existente. Úsalo para: ventas, pérdidas, devoluciones a proveedor, etc.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 border rounded bg-light">
+                            <h6 class="text-warning"><i class="bi bi-pencil-square"></i> Ajuste</h6>
+                            <p class="small mb-0">Establece el stock a un valor específico. Úsalo para: correcciones de inventario físico.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Almacenar información de productos
+let productosData = {};
+
+// Cargar datos de productos al iniciar
+document.addEventListener('DOMContentLoaded', function() {
+    {% for producto in productos %}
+    productosData[{{ producto.id }}] = {
+        nombre: "{{ producto.nombre }}",
+        stock: {{ producto.cantidad }},
+        sku: "{{ producto.sku if producto.sku else '' }}"
+    };
+    {% endfor %}
+});
+
+function actualizarStockActual() {
+    const productoSelect = document.getElementById('producto_id');
+    const productoId = productoSelect.value;
+
+    if (productoId && productosData[productoId]) {
+        const stock = productosData[productoId].stock;
+        document.getElementById('stockActual').textContent = stock;
+        document.getElementById('stockActualInfo').style.display = 'block';
+        calcularNuevoStock();
+    } else {
+        document.getElementById('stockActualInfo').style.display = 'none';
+        document.getElementById('nuevoStockContainer').style.display = 'none';
+    }
+}
+
+function actualizarTipoMovimiento() {
+    const tipo = document.getElementById('tipo').value;
+    const cantidadLabel = document.getElementById('cantidadLabel');
+    const cantidadHelp = document.getElementById('cantidadHelp');
+
+    if (tipo === 'entrada') {
+        cantidadLabel.innerHTML = '<i class="bi bi-123"></i> Cantidad a Sumar *';
+        cantidadHelp.textContent = 'Cantidad que se sumará al stock actual';
+    } else if (tipo === 'salida') {
+        cantidadLabel.innerHTML = '<i class="bi bi-123"></i> Cantidad a Restar *';
+        cantidadHelp.textContent = 'Cantidad que se restará del stock actual';
+    } else if (tipo === 'ajuste') {
+        cantidadLabel.innerHTML = '<i class="bi bi-123"></i> Nuevo Stock Total *';
+        cantidadHelp.textContent = 'El stock se ajustará a esta cantidad exacta';
+    }
+
+    calcularNuevoStock();
+}
+
+function calcularNuevoStock() {
+    const productoId = document.getElementById('producto_id').value;
+    const tipo = document.getElementById('tipo').value;
+    const cantidad = parseInt(document.getElementById('cantidad').value) || 0;
+
+    if (!productoId || !tipo || !productosData[productoId]) {
+        document.getElementById('nuevoStockContainer').style.display = 'none';
+        return;
+    }
+
+    const stockActual = productosData[productoId].stock;
+    let nuevoStock = 0;
+    let alertClass = 'alert-info';
+
+    if (tipo === 'entrada') {
+        nuevoStock = stockActual + cantidad;
+        alertClass = 'alert-success';
+    } else if (tipo === 'salida') {
+        nuevoStock = stockActual - cantidad;
+        alertClass = nuevoStock < 0 ? 'alert-danger' : 'alert-warning';
+    } else if (tipo === 'ajuste') {
+        nuevoStock = cantidad;
+        alertClass = nuevoStock > stockActual ? 'alert-success' : 'alert-warning';
+    }
+
+    const nuevoStockInfo = document.getElementById('nuevoStockInfo');
+    nuevoStockInfo.className = 'alert ' + alertClass;
+    document.getElementById('nuevoStock').textContent = nuevoStock;
+    document.getElementById('nuevoStockContainer').style.display = 'block';
+
+    if (nuevoStock < 0) {
+        nuevoStockInfo.innerHTML = '<i class="bi bi-exclamation-triangle"></i> <strong>¡Advertencia!</strong> El stock quedaría en <strong>' + nuevoStock + '</strong> unidades (negativo)';
+    } else {
+        nuevoStockInfo.innerHTML = '<i class="bi bi-calculator"></i> <strong>Nuevo Stock:</strong> <span id="nuevoStock">' + nuevoStock + '</span> unidades';
+    }
+}
+</script>
+{% endblock %}

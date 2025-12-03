@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}{% if producto %}Editar{% else %}Nuevo{% endif %} Producto - Inventario App{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h1 class="display-5">
+            <i class="bi bi-{% if producto %}pencil-square{% else %}plus-circle{% endif %}"></i>
+            {% if producto %}Editar{% else %}Nuevo{% endif %} Producto
+        </h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('productos') }}">Productos</a></li>
+                <li class="breadcrumb-item active">{% if producto %}Editar{% else %}Nuevo{% endif %}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<!-- Formulario -->
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card card-custom shadow-custom-lg">
+            <div class="card-header card-header-custom">
+                <i class="bi bi-info-circle"></i> Información del Producto
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row g-3">
+                        <!-- Nombre -->
+                        <div class="col-md-8">
+                            <label for="nombre" class="form-label">
+                                <i class="bi bi-tag"></i> Nombre del Producto *
+                            </label>
+                            <input type="text" class="form-control" id="nombre" name="nombre"
+                                   value="{{ producto.nombre if producto else '' }}" required>
+                        </div>
+
+                        <!-- SKU -->
+                        <div class="col-md-4">
+                            <label for="sku" class="form-label">
+                                <i class="bi bi-upc-scan"></i> SKU
+                            </label>
+                            <input type="text" class="form-control" id="sku" name="sku"
+                                   value="{{ producto.sku if producto else '' }}"
+                                   placeholder="Ej: PROD-001">
+                        </div>
+
+                        <!-- Descripción -->
+                        <div class="col-md-12">
+                            <label for="descripcion" class="form-label">
+                                <i class="bi bi-file-text"></i> Descripción
+                            </label>
+                            <textarea class="form-control" id="descripcion" name="descripcion"
+                                      rows="3">{{ producto.descripcion if producto else '' }}</textarea>
+                        </div>
+
+                        <!-- Precio -->
+                        <div class="col-md-4">
+                            <label for="precio" class="form-label">
+                                <i class="bi bi-currency-dollar"></i> Precio *
+                            </label>
+                            <input type="number" class="form-control" id="precio" name="precio"
+                                   step="0.01" min="0" value="{{ producto.precio if producto else '' }}" required>
+                        </div>
+
+                        <!-- Cantidad -->
+                        <div class="col-md-4">
+                            <label for="cantidad" class="form-label">
+                                <i class="bi bi-box-seam"></i> Cantidad *
+                            </label>
+                            <input type="number" class="form-control" id="cantidad" name="cantidad"
+                                   min="0" value="{{ producto.cantidad if producto else 0 }}" required>
+                        </div>
+
+                        <!-- Categoría -->
+                        <div class="col-md-4">
+                            <label for="categoria_id" class="form-label">
+                                <i class="bi bi-folder"></i> Categoría
+                            </label>
+                            <select class="form-control" id="categoria_id" name="categoria_id">
+                                <option value="">Sin categoría</option>
+                                {% for categoria in categorias %}
+                                <option value="{{ categoria.id }}"
+                                    {% if producto and producto.categoria_id == categoria.id %}selected{% endif %}>
+                                    {{ categoria.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="col-md-12 mt-4">
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="{{ url_for('productos') }}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle"></i> Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-primary-custom">
+                                    <i class="bi bi-check-circle"></i>
+                                    {% if producto %}Actualizar{% else %}Crear{% endif %} Producto
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Información Adicional -->
+        {% if producto %}
+        <div class="card card-custom mt-3">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted-custom">
+                    <i class="bi bi-clock"></i> Información del Sistema
+                </h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <small class="text-muted-custom">
+                            <strong>ID:</strong> {{ producto.id }}
+                        </small>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted-custom">
+                            <strong>Creado:</strong> {{ producto.created_at if producto.created_at else 'N/A' }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
